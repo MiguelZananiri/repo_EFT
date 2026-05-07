@@ -4,7 +4,10 @@ import com.duoc.backend.user.MyUserDetailsService;
 import com.duoc.backend.user.User;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,27 +16,37 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class LoginController {
 
-    @Autowired
-    JWTAuthenticationConfig jwtAuthtenticationConfig;
+    private final JWTAuthenticationConfig jwtAuthenticationConfig;
+    private final MyUserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private MyUserDetailsService userDetailsService;
+    public LoginController(
+            JWTAuthenticationConfig jwtAuthenticationConfig,
+            MyUserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
 
-    @PostMapping("login")
-    public String login(@RequestBody User loginRequest) {
-
-        /**
-        * En el ejemplo no se realiza la correcta validación del usuario
-        */
-
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
-
-        if (!userDetails.getPassword().equals(loginRequest.getPassword())) {
-            throw new RuntimeException("Invalid login");
-        }
-
-        String token = jwtAuthtenticationConfig.getJWTToken(loginRequest.getUsername());
-        return token;
+        this.jwtAuthenticationConfig = jwtAuthenticationConfig;
+        this.userDetailsService = userDetailsService;
+        this.passwordEncoder = passwordEncoder;
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody User loginRequest) {
+
+        final UserDetails userDetails =
+                userDetailsService.loadUserByUsername(loginRequest.getUsername());
+
+        if (!passwordEncoder.matches(
+                loginRequest.getPassword(),
+                userDetails.getPassword())) {
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid login");
+        }
+
+        String token =
+                jwtAuthenticationConfig.getJWTToken(loginRequest.getUsername());
+
+        return ResponseEntity.ok(token);
+    }
 }

@@ -21,14 +21,21 @@ class WebSecurityConfig{
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
 
-        http
-                .csrf((csrf) -> csrf
-                        .disable())
-                .authorizeHttpRequests( authz -> authz
-                        .requestMatchers(HttpMethod.POST, Constants.LOGIN_URL).permitAll()
-                        .requestMatchers(HttpMethod.GET, Constants.LOGIN_URL).permitAll()
-                        .anyRequest().authenticated())
-                .addFilterAfter(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+http
+    .headers(headers -> headers
+        .contentSecurityPolicy(csp -> csp
+            .policyDirectives(
+                "default-src 'self'; " +
+                "script-src 'self'; " +
+                "style-src 'self'; " +
+                "img-src 'self' data:; " +
+                "font-src 'self'; " +
+                "object-src 'none'; " +
+                "frame-ancestors 'none'; " +
+                "form-action 'self';"
+            )
+        )
+    );
         return http.build();
     }
 }

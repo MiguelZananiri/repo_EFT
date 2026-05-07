@@ -1,16 +1,21 @@
 package com.duoc.backend.medication;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/medication")
+@RequestMapping("/medications")
 public class MedicationController {
 
-    @Autowired
-    private MedicationService medicationService;
+    private final MedicationService medicationService;
+
+    public MedicationController(MedicationService medicationService) {
+        this.medicationService = medicationService;
+    }
 
     @GetMapping
     public List<Medication> getAllMedications() {
@@ -18,17 +23,27 @@ public class MedicationController {
     }
 
     @GetMapping("/{id}")
-    public Medication getMedicationById(@PathVariable Long id) {
-        return medicationService.getMedicationById(id);
+    public ResponseEntity<Medication> getMedicationById(
+            @PathVariable Long id) {
+
+        Medication medication =
+                medicationService.getMedicationById(id);
+
+        if (medication == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(medication);
     }
 
     @PostMapping
-    public Medication saveMedication(@RequestBody Medication medication) {
-        return medicationService.saveMedication(medication);
-    }
+    public ResponseEntity<Medication> saveMedication(
+            @RequestBody Medication medication) {
 
-    @DeleteMapping("/{id}")
-    public void deleteMedication(@PathVariable Long id) {
-        medicationService.deleteMedication(id);
+        Medication savedMedication =
+                medicationService.saveMedication(medication);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(savedMedication);
     }
 }

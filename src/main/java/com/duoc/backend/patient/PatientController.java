@@ -14,15 +14,19 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/patient")
 public class PatientController {
 
-    @Autowired
-    private PatientService patientService;
+    private final PatientService patientService;
+
+    public PatientController(PatientService patientService) {
+        this.patientService = patientService;
+    }
 
     @GetMapping("/register")
-    public String greetings(@RequestParam(value="name", defaultValue="World") String name) {
-        return "Hello {" + name + "}";
+    public String greetings(
+            @RequestParam(value = "name", defaultValue = "World") String name) {
+
+        return "Hello " + name;
     }
 
     @GetMapping

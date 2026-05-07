@@ -6,11 +6,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/appointment")
 public class AppointmentController {
 
-    @Autowired
-    private AppointmentService appointmentService;
+    private final AppointmentService appointmentService;
+
+    public AppointmentController(AppointmentService appointmentService) {
+        this.appointmentService = appointmentService;
+    }
 
     @GetMapping
     public List<Appointment> getAllAppointments() {

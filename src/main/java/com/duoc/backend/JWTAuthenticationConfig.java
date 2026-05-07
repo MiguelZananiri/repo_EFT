@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 
+import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,11 @@ public class JWTAuthenticationConfig {
                 .compact();
 
         return "Bearer " + token;
+    }
+
+    private Key getSigningKey(String superSecretKey) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getSigningKey'");
     }
 
 }

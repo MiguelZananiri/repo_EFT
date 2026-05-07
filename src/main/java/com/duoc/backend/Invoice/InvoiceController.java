@@ -22,32 +22,38 @@ import java.util.List;
 @RequestMapping("/invoice")
 public class InvoiceController {
 
-    @Autowired
-    private InvoiceService invoiceService;
+    private final InvoiceRepository InvoiceRepository;
+
+    public InvoiceController(InvoiceRepository InvoiceRepository) {
+        this.InvoiceRepository = InvoiceRepository;
+    }
 
     @GetMapping
     public List<Invoice> getAllInvoices() {
-        return (List<Invoice>) invoiceService.getAllInvoices();
+        return (List<Invoice>) InvoiceRepository.findAll();
     }
 
     @GetMapping("/{id}")
-    public Invoice getInvoiceById(@PathVariable Long id) {
-        return invoiceService.getInvoiceById(id);
+    public ResponseEntity<Invoice> getCareById(@PathVariable Long id) {
+
+        return InvoiceRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public Invoice saveInvoice(@RequestBody Invoice invoice) {
-        return invoiceService.saveInvoice(invoice);
+        return InvoiceRepository.save(invoice);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteInvoice(@PathVariable Long id) {
-        invoiceService.deleteInvoice(id);
+    public void deleteCare(@PathVariable Long id) {
+        InvoiceRepository.deleteById(id);
     }
 
-    @GetMapping("/pdf/{id}")
-    public ResponseEntity<byte[]> generateInvoicePdf(@PathVariable Long id) {
-        Invoice invoice = invoiceService.getInvoiceById(id);
+    @GetMapping("/download/{id}")
+    public ResponseEntity<byte[]> downloadInvoice(@PathVariable Long id) {
+        Invoice invoice = InvoiceRepository.findById(id).orElse(null);
 
         if (invoice == null) {
             return ResponseEntity.notFound().build();
